@@ -1,0 +1,41 @@
+<svg width="240" height="260" viewBox="0 0 240 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="markGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(20, 20)">
+    <!-- Left pill stroke (diagonal down) -->
+    <path d="M 20 0
+             L 60 0
+             A 20 20 0 0 1 80 20
+             L 80 200
+             A 20 20 0 0 1 60 220
+             L 20 220
+             A 20 20 0 0 1 0 200
+             L 0 20
+             A 20 20 0 0 1 20 0 Z"
+          fill="url(#markGradient)"/>
+
+    <!-- Right pill stroke (diagonal up) -->
+    <path d="M 140 0
+             L 180 0
+             A 20 20 0 0 1 200 20
+             L 200 200
+             A 20 20 0 0 1 180 220
+             L 140 220
+             A 20 20 0 0 1 120 200
+             L 120 20
+             A 20 20 0 0 1 140 0 Z"
+          fill="url(#markGradient)"/>
+
+    <!-- Diagonal connector line -->
+    <line x1="40" y1="185" x2="160" y2="35" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+
+    <!-- Node circles -->
+    <circle cx="40" cy="185" r="16" fill="none" stroke="#FFFFFF" stroke-width="10"/>
+    <circle cx="160" cy="35" r="16" fill="none" stroke="#FFFFFF" stroke-width="10"/>
+  </g>
+</svg>

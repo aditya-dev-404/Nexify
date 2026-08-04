@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+:root {
+
+  /* Backgrounds */
+  --bg: #ECEBE8;
+  --surface: #F0EFEC;
+  --surface-light: #F7F6F3;
+
+  /* Brand Colours (from logo) */
+  --primary: #3B6FE0;
+  --secondary: #8B5CF6;
+  --accent: #38BDF8;
+
+  /* Text */
+  --text: #161B33;
+  --text-muted: #6B7094;
+
+  /* Borders */
+  --border: #DEDCD7;
+
+  /* Status */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+
+  /* Shadows */
+  --shadow-dark: #C9C7C1;
+  --shadow-light: #FFFFFF;
+}
+
+/* Chrome, Edge, Safari */
+.custom-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: var(--surface);
+  border-radius: 20px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: var(--surface-light);
+  border-radius: 20px;
+  box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--surface);
+}
+
+/* Firefox */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-light) var(--surface);
+}
+.neo {
+  background: var(--surface);
+
+  box-shadow:
+    8px 8px 16px var(--shadow-dark),
+   -8px -8px 16px var(--shadow-light);
+
+  border-radius: 20px;
+}
+
+.neo-inset {
+  background: var(--surface);
+
+  box-shadow:
+    inset 5px 5px 10px var(--shadow-dark),
+    inset -5px -5px 10px var(--shadow-light);
+
+  border-radius: 20px;
+}
+
+.gradient-btn {
+  background: linear-gradient(
+    135deg,
+    var(--primary),
+    var(--secondary)
+  );
+}
