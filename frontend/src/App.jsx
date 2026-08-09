@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Home from './pages/Home'
 import Signup from './pages/Signup'
 import { useUser } from './context/userContext';
+import Networks from './pages/Networks';
 
 function App() {
   const { user, loading } = useUser();
@@ -18,6 +19,7 @@ function App() {
         <Route path='/' element={user ? <Home/> : <Navigate to={"/login"}/>}/>
         <Route path="/signup" element={user ? <Navigate to={"/"}/> : <Signup/>}/>
         <Route path="/login" element={user ? <Navigate to={"/"}/> :<Login/>}/>
+        <Route path='/networks' element={user ? <Networks/> : <Navigate to={"/login"}/>}/>
       </Routes>
       <ToastContainer position="top-right" autoClose={5000} />
     </>

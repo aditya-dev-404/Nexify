@@ -34,12 +34,16 @@ export const UserProvider = ({ children }) => {
     }, [baseUrl]);
 
     useEffect(() => {
-        asyncHandler(getPosts, setLoading)();
-    }, [getPosts]);
-
-    useEffect(() => {
         fetchUser();
     }, [fetchUser]);
+
+    useEffect(() => {
+        if (!user?._id) {
+            return;
+        }
+
+        asyncHandler(getPosts)();
+    }, [user?._id, getPosts]);
 
     const value = {
         user,

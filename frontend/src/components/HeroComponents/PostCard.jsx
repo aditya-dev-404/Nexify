@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ImagesCarousel from '../ImagesCarousel'
 import { AiFillLike } from "react-icons/ai";
 import { FaComments } from "react-icons/fa6";
@@ -8,11 +8,16 @@ import axios from 'axios';
 import { useAuth } from '../../context/userAuth';
 import { useUser } from '../../context/userContext';
 import defaultProfileImage from '../../assets/profile.png';
+import {io} from 'socket.io-client'
+import ConnectionButton from '../ConnectionButton';
+
+const socket = io('http://localhost:8080')
+
 
 function PostCard({ postInfo }) {
     const { baseUrl } = useAuth();
-    const { user, getPosts } = useUser();
-    const [post, setPost] = useState(postInfo);
+    const { user } = useUser();
+    const [likes, setLikes] = useState(postInfo.likes);
     const [expanded, setExpanded] = useState(false);
     const [liked, setLiked] = useState(postInfo.likes.includes(user?._id));
     const [openCommentBox, setOpenCommentBox] = useState(false);
@@ -25,10 +30,31 @@ function PostCard({ postInfo }) {
         const result = await axios.get(baseUrl + `/api/user/post/like/${postInfo._id}`, {
             withCredentials: true
         })
-        setPost(result.data.data);
-        setLiked(!liked);
-        getPosts();
+        setLiked(result.data.data.likes.includes(user?._id));
     })
+
+    useEffect(() => {
+        const handleLikeUpdated = ({ postId, likes: updatedLikes }) => {
+            if (postId === postInfo._id) {
+                setLikes(updatedLikes);
+                setLiked(updatedLikes.includes(user?._id));
+            }
+        };
+        const handleCommentUpdate = ({postId, comm})=>{
+            if(postId === postInfo._id){
+                setComments(comm);
+            }
+        }
+        socket.on("likeUpdated", handleLikeUpdated);
+        socket.on("commentAdded", handleCommentUpdate)
+
+        return () =>{
+            socket.off("likeUpdated", handleLikeUpdated);
+            socket.off("commentAdded", handleCommentUpdate);
+        } 
+    }, [postInfo._id, user?._id]);
+
+
 
     const handleAddComment = asyncHandler(async (e) => {
         e.preventDefault();
@@ -51,6 +77,8 @@ function PostCard({ postInfo }) {
                         <p className='text-xs sm:text-sm text-[var(--text-muted)] truncate'>{postInfo.author.headings}</p>
                         <p className='text-xs text-[var(--text-muted)] truncate'>{moment(postInfo.createdAt).fromNow()}</p>
                     </div>
+                       {user._id !== postInfo.author._id && <ConnectionButton userId = {postInfo.author._id}/>}
+                    
                 </div>
 
                 <div className="post-description text-[var(--text)] text-sm sm:text-base leading-relaxed">
@@ -74,7 +102,7 @@ function PostCard({ postInfo }) {
 
                 <div className="like-comment-iconbox flex items-center justify-between gap-6 border-y border-[var(--border)] py-5 px-8">
                     <div onClick={handleLike} className={`like flex items-center gap-2 ${liked ? "text-[var(--primary)]" : "text-[var(--text-muted)]"} cursor-pointer transition text-sm sm:text-base`}>
-                        <AiFillLike size={25} /> <p>{post.likes.length}</p>
+                        <AiFillLike size={25} /> <p>{likes.length}</p>
                     </div>
                     <div onClick={() => setOpenCommentBox(!openCommentBox)} className="comment flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--primary)] cursor-pointer transition text-sm sm:text-base">
                         <FaComments size={25} /> <p>{comments.length}</p>

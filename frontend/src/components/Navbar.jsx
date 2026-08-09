@@ -13,6 +13,7 @@ import MobileSearch from './MobileSearch';
 import BottomBarForMobile from './BottomBarForMobile';
 import { asyncHandler } from '../utils/async.handler.js';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -23,12 +24,7 @@ function Navbar() {
     const [profileClicked, setProfileClicked] = useState(false);
     const {user} = useUser();
     const { baseUrl } = useAuth();
-
-
-
-
-
-
+    const navigate = useNavigate();
 
 
 
@@ -41,7 +37,7 @@ function Navbar() {
     return (
         <>
             <div className="nav-main flex items-center w-full h-[60px] md:h-[80px] fixed top-0 left-0 z-50 bg-[var(--surface)] shadow-[0_4px_16px_var(--shadow-dark)] px-4 md:px-8 gap-3">
-                {/* Logo */}
+
                 <div className="logo flex-shrink-0">
                     <img src={naxifyMark} alt="logo" className='w-[36px] md:w-[50px]' />
                 </div>
@@ -58,10 +54,10 @@ function Navbar() {
                     />
                 </form>
 
-                {/* Right-side group: search icon (mobile), nav icons (desktop), profile — pushed to the right */}
+
                 <div className="flex items-center gap-2 md:gap-3 ml-auto flex-shrink-0">
 
-                    {/* Mobile search icon → expands search below */}
+
                     <button
                         type="button"
                         onClick={() => setSearchOpen(!searchOpen)}
@@ -71,12 +67,12 @@ function Navbar() {
                     </button>
 
                     <div className="hidden md:flex items-center gap-3">
-                        <div className="home flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-light)] cursor-pointer transition">
+                        <div onClick={()=>navigate('/')} className="home flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-light)] cursor-pointer transition">
                             <FaHome className="text-lg" />
                             <p className="text-[11px] leading-none">Home</p>
                         </div>
 
-                        <div className="my-network flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-light)] cursor-pointer transition">
+                        <div onClick={()=>navigate('/networks')} className="my-network flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-light)] cursor-pointer transition">
                             <IoPeople className="text-lg" />
                             <p className="text-[11px] leading-none">My Network</p>
                         </div>
@@ -88,7 +84,7 @@ function Navbar() {
                         </div>
                     </div>
 
-                    {/* Profile */}
+
                     <div
                         className="profile cursor-pointer"
                         onClick={() => setProfileClicked(!profileClicked)}
@@ -106,11 +102,11 @@ function Navbar() {
 
                 </div>
             </div>
-            {/* Expandable mobile search bar — slides below top bar */}
+
             {searchOpen && (<MobileSearch />)}
-            {/* Bottom tab bar — mobile only, always visible, no click can hide it */}
+
            <BottomBarForMobile/>
-            {/* Spacers */}
+
             <div className="h-[60px] md:h-[80px]"></div>
 
         </>
