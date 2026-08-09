@@ -5,8 +5,17 @@ import authRouter from './routes/auth.routes.js'
 import userRouter from './routes/user.routs.js'
 import postRouter from './routes/post.routes.js';
 import connectionRouter from './routes/connection.routes.js';
-const app = express();
+import http from 'http'
+import {Server} from 'socket.io'
 
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors : ({
+    origin:"http://localhost:5173",
+    credentials:true
+    })
+})
 app.use(cors({
     origin:"http://localhost:5173",
     credentials:true
@@ -27,7 +36,15 @@ app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
 app.use('/api/user/post', postRouter);
 app.use('/api/user/connection', connectionRouter)
-
+export const userSocketMap = new Map();
+io.on("connection", (socket) => {
+    socket.on("register", (userId)=>{
+        userSocketMap.set(userId, socket.id);
+    })
+    socket.on("disconnect", (socket)=>{
+        console.log("user disconnected", socket.id);
+    })
+})
 
 //global error handler
 
@@ -41,4 +58,4 @@ app.use((err, req, res, next) => {
     })
 })
 
-export { app };
+export { app, server, io };

@@ -5,6 +5,8 @@ import ApiResponse from "../utils/api.response.js";
 import cloudinary from "../config/cloud.config.js";
 import User from "../models/user.model.js";
 import fs from 'fs/promises'
+import { isObjectIdOrHexString } from "mongoose";
+import {io} from '../app.js'
 
 
 
@@ -61,6 +63,8 @@ export const handleLike = asyncHandler(async (req, res) => {
         updateOperator, 
         { returnDocument: 'after' } 
     );
+    io.emit("likeUpdated", {postId, likes:updatedPost.likes});
+    
     res.status(200).json(new ApiResponse(200, updatedPost, "Like status updated successfully"));
 });
 
@@ -72,6 +76,6 @@ export const handleComment = asyncHandler(async (req, res) => {
         $push : {comments:{content, user:userId}}
     },{returnDocument:'after'})
     .populate("comments.user", "firstName lastName profileImage headline")
-    
+    io.emit("commentAdded", {postId, comm: updatedPost.comments})
     res.status(201).json(new ApiResponse(201, updatedPost, "Comment Added."));
 })

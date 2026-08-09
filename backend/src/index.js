@@ -1,10 +1,11 @@
 import connectDB from "./config/db.config.js";
 import { ENV } from "./config/env.config.js";
-import { app } from "./app.js";
+import { app, server } from "./app.js";
+
 
 connectDB()
     .then(()=>{
-        app.listen(ENV.PORT, ()=>{
+        server.listen(ENV.PORT, ()=>{
             console.log(`Server Running on Port ${ENV.PORT}`);
         })
     }).catch((err)=>{
