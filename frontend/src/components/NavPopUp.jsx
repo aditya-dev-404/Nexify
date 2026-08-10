@@ -37,7 +37,7 @@ function NavPopUp() {
   </div>
 
   {/* View profile button */}
-  <button className='gradient-btn text-white text-sm font-medium py-2 rounded-full mb-4 hover:opacity-90 active:scale-[0.98] transition'>
+  <button onClick={()=>navigate('/profile')} className='gradient-btn text-white text-sm font-medium py-2 rounded-full mb-4 hover:opacity-90 active:scale-[0.98] transition'>
     View Profile
   </button>
 
