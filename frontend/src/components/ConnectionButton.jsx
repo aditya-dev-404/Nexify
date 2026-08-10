@@ -17,12 +17,10 @@ function ConnectionButton({userId}) {
     const handleSendConnection = asyncHandler( async()=>{
         const result = await axios.post(`${baseUrl}/api/user/connection/send/${userId}`,{}, {withCredentials:true});
         setStatus("pending");
-        console.log(result.data);
     })
     const handleRemoveConnection = asyncHandler( async()=>{
         const result = await axios.delete(`${baseUrl}/api/user/connection/remove/${userId}`, {withCredentials:true});
         setStatus("connect");
-        console.log(result.data);
     })
     const getConnectionStatus = useCallback(async () => {
         const result = await axios.get(`${baseUrl}/api/user/connection/getStatus/${userId}`, {withCredentials:true});

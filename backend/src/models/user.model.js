@@ -74,7 +74,7 @@ const userSchema = new mongoose.Schema({
         company: { type: String },
         description: { type: String }
     }],
-    connecions: [
+    connections: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"

@@ -3,7 +3,11 @@ import Connection from "../models/connection.model.js";
 import ApiError from "../utils/api.error.js";
 import ApiResponse from "../utils/api.response.js";
 import User from "../models/user.model.js";
-import {io, userSocketMap} from '../app.js'
+import {io} from '../app.js'
+
+const emitStatusUpdate = (userId, updatedUserId, newStatus) => {
+    io.to(`user:${userId}`).emit("statusUpdate", { updatedUserId: String(updatedUserId), newStatus });
+};
 
 
 export const sendConnectionRequest = asyncHandler(async(req, res)=>{
@@ -13,7 +17,12 @@ export const sendConnectionRequest = asyncHandler(async(req, res)=>{
         throw new ApiError(400, "Can't sent request to Yourself");
     }
     const sender = await User.findById(senderId);
-    if(sender.connecions.some(connectionId => connectionId.toString() === id)){
+    const receiver = await User.findById(id);
+    const alreadyConnected =
+        sender.connections.some(connectionId => connectionId.toString() === id) ||
+        receiver.connections.some(connectionId => connectionId.toString() === senderId);
+
+    if(alreadyConnected){
         throw new ApiError(401, "Already connected.");
     }
     const existingConnection = await Connection.findOne({
@@ -29,14 +38,8 @@ export const sendConnectionRequest = asyncHandler(async(req, res)=>{
         reciever: id,
         status : 'pending'
     })
-    const recieverSocketId = userSocketMap.get(id);
-    const senderSocketId = userSocketMap.get(senderId);
-    if(recieverSocketId){
-        io.to(recieverSocketId).emit("statusUpdate", {updatedUserId : senderId,  newStatus:"recieved" });
-    }
-    if(senderSocketId){
-        io.to(senderSocketId).emit("statusUpdate", {updatedUserId : id, newStatus : "pending"});
-    }
+    emitStatusUpdate(id, senderId, "recieved");
+    emitStatusUpdate(senderId, id, "pending");
 
     return res.status(200).json(new ApiResponse(200, newConnection, "Connection Sent successfully"));
 })
@@ -57,20 +60,14 @@ export const acceptConnectionRequest = asyncHandler(async(req, res)=>{
     connection.status = 'accepted';
     await connection.save();
     await User.findByIdAndUpdate(userId, {
-        $addToSet:{connecions:connection.sender}
+        $addToSet:{connections:connection.sender}
     })
-    await User.findByIdAndUpdate(connection.sender._id, {
-        $addToSet:{connecions:connection.reciever}
+    await User.findByIdAndUpdate(connection.sender, {
+        $addToSet:{connections:connection.reciever}
     })
 
-    const recieverSocketId = userSocketMap.get(connection.reciever._id.toString());
-    const senderSocketId = userSocketMap.get(connection.sender._id.toString());
-    if(recieverSocketId){
-        io.to(recieverSocketId).emit("statusUpdate", {updatedUserId :connection.sender.toString() ,  newStatus:"connected" });
-    }
-    if(senderSocketId){
-        io.to(senderSocketId).emit("statusUpdate", {updatedUserId : connection.reciever.toString(), newStatus : "connected"});
-    }
+    emitStatusUpdate(connection.reciever, connection.sender, "connected");
+    emitStatusUpdate(connection.sender, connection.reciever, "connected");
 
 
     return res.status(200).json(new ApiResponse(200, {}, "connection Accepted."))
@@ -92,6 +89,8 @@ export const rejectConnectionRequest = asyncHandler(async(req, res)=>{
     }
     connection.status = 'rejected'
     await connection.save()
+    emitStatusUpdate(connection.reciever, connection.sender, "connect");
+    emitStatusUpdate(connection.sender, connection.reciever, "connect");
     
     return res.status(201).json(new ApiResponse(201, {}, "connection request rejected."))
 })
@@ -100,10 +99,6 @@ export const getConnectionStatus = asyncHandler(async(req, res)=>{
     const targetUserId = req.params.id;
     const currUserId = req.userId;
 
-    const currentUser = await User.findById(currUserId)
-    if(currentUser.connecions.some(connectionId => connectionId.toString() === targetUserId)){
-        return res.status(200).json(new ApiResponse(200, {status:'connected'}, 'you are connected to each other.'));
-    }
     const pendingReq = await Connection.findOne({
         $or:[
             {sender: currUserId, reciever:targetUserId},
@@ -118,14 +113,20 @@ export const getConnectionStatus = asyncHandler(async(req, res)=>{
             return res.status(200).json(new ApiResponse(200, {status:"recieved"}, "accept the connection request."))
         }
     }
+
+    const currentUser = await User.findById(currUserId)
+    if(currentUser.connections.some(connectionId => connectionId.toString() === targetUserId)){
+        return res.status(200).json(new ApiResponse(200, {status:'connected'}, 'you are connected to each other.'));
+    }
+
     return res.status(200).json(new ApiResponse(200, {status:"connect"}, "Send Connection Request"))
 })
 
 export const removeConnection = asyncHandler(async (req, res) => {
     const myId = req.userId;
     const otherUserId = req.params.id;
-    await User.findByIdAndUpdate(myId, {$pull : {connecions : otherUserId}});
-    await User.findByIdAndUpdate(otherUserId, {$pull : {connecions : myId }});
+    await User.findByIdAndUpdate(myId, {$pull : {connections : otherUserId}});
+    await User.findByIdAndUpdate(otherUserId, {$pull : {connections : myId }});
     await Connection.findOneAndDelete({
         $or: [
             { sender: myId, reciever: otherUserId },
@@ -134,14 +135,8 @@ export const removeConnection = asyncHandler(async (req, res) => {
         status: 'accepted'
     });
     
-    const recieverSocketId = userSocketMap.get(otherUserId);
-    const senderSocketId = userSocketMap.get(myId);
-    if(recieverSocketId){
-        io.to(recieverSocketId).emit("statusUpdate", {updatedUserId : myId,  newStatus:"connect" });
-    }
-    if(senderSocketId){
-        io.to(senderSocketId).emit("statusUpdate", {updatedUserId : otherUserId, newStatus : "connect"});
-    }
+    emitStatusUpdate(otherUserId, myId, "connect");
+    emitStatusUpdate(myId, otherUserId, "connect");
 
     return res.status(201).json(new ApiResponse(201, {}, "connection remove successfully."))
 })
@@ -154,6 +149,6 @@ export const getConnectionRequests = asyncHandler(async(req, res)=>{
 
 export const getUserConnections = asyncHandler(async(req, res)=>{
     const userId = req.userId;
-    const user = await User.findById(userId).populate("connection", "firstName lastName userName profileImage headline connections");
+    const user = await User.findById(userId).select('-password').populate("connections", "firstName lastName userName profileImage headings connections");
     return res.status(200).json(new ApiResponse(200, user, "user connections fetched successfully"));
 })

@@ -36,13 +36,9 @@ app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
 app.use('/api/user/post', postRouter);
 app.use('/api/user/connection', connectionRouter)
-export const userSocketMap = new Map();
 io.on("connection", (socket) => {
     socket.on("register", (userId)=>{
-        userSocketMap.set(userId, socket.id);
-    })
-    socket.on("disconnect", (socket)=>{
-        console.log("user disconnected", socket.id);
+        socket.join(`user:${userId}`);
     })
 })
 

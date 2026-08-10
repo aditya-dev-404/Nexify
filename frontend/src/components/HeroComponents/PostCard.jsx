@@ -10,6 +10,7 @@ import { useUser } from '../../context/userContext';
 import defaultProfileImage from '../../assets/profile.png';
 import {io} from 'socket.io-client'
 import ConnectionButton from '../ConnectionButton';
+import { useNavigate } from 'react-router-dom';
 
 const socket = io('http://localhost:8080')
 
@@ -23,7 +24,7 @@ function PostCard({ postInfo }) {
     const [openCommentBox, setOpenCommentBox] = useState(false);
     const [comment, setComment] = useState("");
     const [comments, setComments] = useState(postInfo.comments);
-
+    const navigate = useNavigate();
 
     const isLong = postInfo.description.length > 150;
     const handleLike = asyncHandler(async (e) => {
@@ -32,7 +33,9 @@ function PostCard({ postInfo }) {
         })
         setLiked(result.data.data.likes.includes(user?._id));
     })
-
+    const handleProfileRedirect = (userName)=>{
+        navigate(`/profile/${userName}`)
+    }
     useEffect(() => {
         const handleLikeUpdated = ({ postId, likes: updatedLikes }) => {
             if (postId === postInfo._id) {
@@ -69,7 +72,7 @@ function PostCard({ postInfo }) {
         <>
             <div className="post-card neo p-4 sm:p-6 rounded-2xl w-full flex flex-col gap-4">
                 <div className="post-header flex gap-4">
-                    <div className="image h-[30px] w-[30px] sm:h-[60px] sm:w-[60px] rounded-full overflow-hidden shrink-0 shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)]">
+                    <div onClick={()=>handleProfileRedirect(postInfo.author.userName)} className="image h-[30px] w-[30px] sm:h-[60px] sm:w-[60px] rounded-full overflow-hidden shrink-0 shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)]">
                         <img src={postInfo.author.profileImage.url} alt="" className="h-full w-full object-cover" />
                     </div>
                     <div className="profile-info flex flex-col justify-center w-[70%]">

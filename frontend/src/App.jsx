@@ -22,8 +22,9 @@ function App() {
         <Route path="/login" element={user ? <Navigate to={"/"}/> :<Login/>}/>
         <Route path='/networks' element={user ? <Networks/> : <Navigate to={"/login"}/>}/>
         <Route path='/profile' element={user ? <Profile/> : <Navigate to={"/login"}/>}/>
+        <Route path='/profile/:userName' element={user ? <Profile/> : <Navigate to={"/login"}/>}/>
       </Routes>
-      <ToastContainer position="top-right" autoClose={5000} />
+      <ToastContainer position="top-right" autoClose={2000} />
     </>
   )
 }

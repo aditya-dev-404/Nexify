@@ -11,6 +11,8 @@ export const UserProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [edit, setEdit] = useState(false);
     const [createPost, setCreatePost] = useState(false);
+    const [profileData, setProfileData] = useState(null);
+
 
     const fetchUserRaw = useCallback(async () => {
         try {
@@ -45,6 +47,15 @@ export const UserProvider = ({ children }) => {
         asyncHandler(getPosts)();
     }, [user?._id, getPosts]);
 
+    const getUserDetails = useCallback(async (userName) => {
+        if(!userName){
+            throw new Error("Missing username.");
+        }
+        const fetchedUser = await axios.get(baseUrl+`/api/user/getuserdetails/${userName}`, {withCredentials : true});
+        setProfileData(fetchedUser.data.data);
+        return fetchedUser.data.data;
+    }, [baseUrl])
+
     const value = {
         user,
         setUser,
@@ -55,7 +66,10 @@ export const UserProvider = ({ children }) => {
         setEdit,
         createPost,
         setCreatePost,
-        refetchUser: fetchUser
+        refetchUser: fetchUser,
+        getUserDetails,
+        profileData,
+        setProfileData
     }
     return (
         <UserContext.Provider value={value}>

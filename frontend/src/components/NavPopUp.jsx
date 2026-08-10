@@ -8,7 +8,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
-function NavPopUp() {
+function NavPopUp({profileClick}) {
     const {user, setUser} = useUser();
     const {baseUrl} = useAuth();
     const navigate = useNavigate();
@@ -18,6 +18,10 @@ function NavPopUp() {
         navigate('/login');
         toast.success('Logged out')
     })
+    const handleNav = ()=>{
+      profileClick(false)
+      navigate('/profile')
+    }
   return (
     <>
     <div className="profile-info absolute top-[95px] right-0 w-[260px] neo bg-[var(--surface)] p-5 z-50 flex flex-col">
@@ -37,14 +41,14 @@ function NavPopUp() {
   </div>
 
   {/* View profile button */}
-  <button onClick={()=>navigate('/profile')} className='gradient-btn text-white text-sm font-medium py-2 rounded-full mb-4 hover:opacity-90 active:scale-[0.98] transition'>
+  <button onClick={handleNav} className='gradient-btn text-white text-sm font-medium py-2 rounded-full mb-4 hover:opacity-90 active:scale-[0.98] transition'>
     View Profile
   </button>
 
   <div className="w-full h-[1px] bg-[var(--border)] mb-3"></div>
 
   {/* My Networks row */}
-  <div className="networks flex items-center justify-between py-2 px-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-light)] cursor-pointer transition mb-2">
+  <div onClick={()=>navigate('/networks')} className="networks flex items-center justify-between py-2 px-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-light)] cursor-pointer transition mb-2">
     <span className="text-sm">My Networks</span>
     <IoPeople className="text-lg" />
   </div>

@@ -67,5 +67,18 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     user.profileImage = profileImageUrl;
     user.coverImage = coverImageUrl;
     const updatedUser = await user.save();
-    res.status(200).json(new ApiResponse(200, updatedUser, 'User Upadated SuccessFully.'));
+    return res.status(200).json(new ApiResponse(200, updatedUser, 'User Upadated SuccessFully.'));
+})
+
+
+export const getUserDetails = asyncHandler(async(req, res)=>{
+    const {userName} = req.params;
+    if(!userName){
+        throw new ApiError(404, 'Id not found.')
+    }
+    const user = await User.findOne({userName}).select('-password -email -userName').populate("connections","firstName lastName profileImage headings gender");
+    if(!user){
+        throw new ApiError(404, "Requested user not exists.");
+    }
+    return res.status(200).json(new ApiResponse(200, user, "Requested User Fetched Successfully."))
 })
