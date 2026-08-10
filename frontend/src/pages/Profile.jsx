@@ -9,7 +9,7 @@ import EditProfile from '../components/EditProfile'
 import { IoLocationSharp } from "react-icons/io5";
 import { useNavigate, useParams } from 'react-router-dom'
 import { asyncHandler } from '../utils/async.handler';
-
+import ConnectionButton from '../components/ConnectionButton.jsx'
 
 
 function Profile() {
@@ -109,10 +109,12 @@ function Profile() {
                         </div>
                     )}
 
-                    {isOwnProfile && (<div className="edit mt-5 flex justify-center">
+                    {isOwnProfile ? (<div className="edit mt-5 flex justify-center">
                         <button onClick={() => setEdit(!edit)} className="gradient-btn text-white min-w-[40%] text-sm font-medium px-6 py-2 rounded-full hover:opacity-90 active:scale-[0.98] transition">
                             Edit Profile
                         </button>
+                    </div>):(<div className="edit mt-5 flex justify-center">
+                        <ConnectionButton userId={profileData._id}/>
                     </div>)}
                     <div className="w-full h-[2px] bg-[var(--border)] m-5"></div>
                     {/* Posts */}

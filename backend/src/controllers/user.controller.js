@@ -71,14 +71,28 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
 })
 
 
-export const getUserDetails = asyncHandler(async(req, res)=>{
-    const {userName} = req.params;
-    if(!userName){
+export const getUserDetails = asyncHandler(async (req, res) => {
+    const { userName } = req.params;
+    if (!userName) {
         throw new ApiError(404, 'Id not found.')
     }
-    const user = await User.findOne({userName}).select('-password -email -userName').populate("connections","firstName lastName profileImage headings gender");
-    if(!user){
+    const user = await User.findOne({ userName }).select('-password -email -userName').populate("connections", "firstName lastName profileImage headings gender");
+    if (!user) {
         throw new ApiError(404, "Requested user not exists.");
     }
     return res.status(200).json(new ApiResponse(200, user, "Requested User Fetched Successfully."))
+})
+
+export const getSuggestedUsers = asyncHandler(async (req, res) => {
+    const currUser = await User.findById(req.userId).select("connection");
+    if (!currUser) {
+        throw new ApiError(400, "Login first.")
+    }
+    const suggestedUsers = await User.find({
+        _id: { $ne: currUser._id, $nin: currUser.connections }
+    }).select("-password -email");
+    if (suggestedUsers.length == 0) {
+        return res.status(201).json(new ApiResponse(201, {}, "No users to suggest."))
+    }
+    return res.status(200).json(new ApiResponse(200, suggestedUsers, "Suggested Users"))
 })

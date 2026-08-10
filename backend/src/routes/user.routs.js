@@ -1,7 +1,7 @@
 import express from 'express'
 const router = express.Router();
 import { isAuthenticated } from '../middlewares/isAuth.js';
-import { getUser, getUserDetails, updateProfileImage, updateUserProfile } from '../controllers/user.controller.js';
+import { getSuggestedUsers, getUser, getUserDetails, updateProfileImage, updateUserProfile } from '../controllers/user.controller.js';
 import upload from '../middlewares/multer.js';
 import multer from 'multer';
 import { search } from '../controllers/search.controller.js';
@@ -16,5 +16,7 @@ router.put('/updateUserProfile', isAuthenticated, upload.fields([
 router.get('/getuserdetails/:userName', isAuthenticated, getUserDetails)
 
 router.get('/search', isAuthenticated, search);
+
+router.get('/suggestedusers',isAuthenticated, getSuggestedUsers)
 
 export default router;

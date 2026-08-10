@@ -8,13 +8,14 @@ export const search = asyncHandler(async(req, res)=>{
     if(!query){
         throw new ApiError(400, "Missing Query Parameters.")
     }
+    const searchRegex = new RegExp(query, "i");
     const result = await User.find({
         $or:[
             {firstName:{$regex:query,$options:"i"}},
             {lastName:{$regex:query,$options:"i"}},
             {userName:{$regex:query,$options:"i"}},
             {headings:{$regex:query,$options:"i"}},
-            {skills:{$in:[query]}},
+            {skills: { $elemMatch: { $regex: searchRegex } }}
         ]
     })
     return res.status(200).json(new ApiResponse(200, result, "Search Results"))
