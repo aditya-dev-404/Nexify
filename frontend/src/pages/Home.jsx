@@ -41,7 +41,7 @@ function Home() {
 
   return (
     <>
-      <div className="w-full min-h-[100vh] lg:pt-[100px] md:pt-[15px] sm:pt-[1px] flex flex-col lg:flex-row items-start gap-4 lg:gap-5 px-3 lg:px-4">
+      <div className="w-full min-h-[100vh] lg:pt-[100px] md:pt-[15px] sm:pt-[1px] flex flex-col lg:flex-row items-start gap-4 lg:gap-5 px-3 lg:px-4 ">
         {edit && <EditProfile />}
         {createPost && <CreatePostForm setCreateForm={setCreatePost} />}
         <Navbar />
@@ -56,7 +56,7 @@ function Home() {
         <CenterHero />
 
         {/* ---------- RIGHT: Full panel — lg and up only ---------- */}
-        <div className="hidden lg:flex flex-col gap-3 w-full lg:w-[25%] mt-4 neo bg-[var(--surface)] rounded-2xl p-5">
+        <div className="sticky top-25 hidden lg:flex flex-col gap-3 w-full lg:w-[25%] mt-4 neo bg-[var(--surface)] rounded-2xl p-5 max-h-[60vh] no-scrollbar overflow-scroll">
           {suggestions.length !== 0 && (
             <h5 className="text-[var(--text)] text-sm font-semibold px-1">Suggestions...</h5>
           )}

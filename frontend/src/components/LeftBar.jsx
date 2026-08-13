@@ -9,7 +9,7 @@ function LeftBar() {
     const {edit, setEdit, user, setUser} = useUser();
   return (
     <>
-    <div className="hidden lg:block w-full lg:w-[25%] min-h-[250px] mt-4 neo bg-[var(--surface)] rounded-2xl overflow-hidden pb-5">
+    <div className=" sticky top-25 hidden lg:block w-full lg:w-[25%] min-h-[250px] mt-4 neo bg-[var(--surface)] rounded-2xl overflow-hidden pb-5">
           <div className="relative">
             <div className="cover w-full h-[100px] bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] overflow-hidden">
               <img src={user.coverImage.url} alt="Cover" className="w-full h-full object-cover" />

@@ -7,6 +7,8 @@ import bcrypt from 'bcryptjs'
 import ApiError from '../utils/api.error.js'
 import ApiResponse from '../utils/api.response.js'
 import generateToken from '../config/token.js'
+import transporter from '../config/mail.config.js'
+import { mailOptionsForOtp, welcomeMailOptions } from '../config/mail.options.js'
 
 
 export const signup = asyncHandler(async (req, res) => {
@@ -14,12 +16,12 @@ export const signup = asyncHandler(async (req, res) => {
     if (!firstName || !userName || !email) {
         throw new ApiError(400, "Fill the Data Correctly");
     }
-    console.log(req.body);
+
     if (password.length < 6) {
         throw new ApiError(400, "Password must contain at least 6 characters.");
     }
     const existingUser = await User.findOne({ $or: [{ email }, { userName }] });
-    console.log(existingUser);
+
     if (existingUser) {
         throw new ApiError(409, "Invalid User or Email.")
     }
@@ -39,8 +41,56 @@ export const signup = asyncHandler(async (req, res) => {
         sameSite: "strict",
         secure: ENV.NODE_ENV === 'production'
     })
+    await transporter.sendMail(welcomeMailOptions(email, firstName));
     res.status(201).json(new ApiResponse(201, createdUser, "User created successfully"))
 
+})
+
+export const sendVerifyEmailOtp = asyncHandler(async(req, res)=>{
+    const {email} = req.body
+    if(!email){
+        throw new ApiError(401, "Email must be present.");
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = await bcrypt.hash(otp, 12);
+    const verifyToken = jwt.sign({email,otp:hashedOtp},ENV.SECRET_KEY, {expiresIn : '10m'});
+    res.cookie('verifyToken', verifyToken,{
+        httpOnly: true,
+        maxAge: 10*60*1000,
+        sameSite:"strict",
+        secure: ENV.NODE_ENV === 'production'
+    })
+
+    await transporter.sendMail(mailOptionsForOtp(email, otp));
+    return res.status(201).json(new ApiResponse(201,{}, "Otp Sent."));
+})
+
+export const verifyOtp = asyncHandler(async(req, res)=>{
+    const {otp, email} = req.body;
+    if(!otp || !email){
+        throw new ApiError(401, "Enter valid credentials.");
+    }
+    const {verifyToken} = req.cookies;
+    if(!verifyToken){
+        throw new ApiError(400, "Token Doesn't Exists.")
+    }
+    const stored = jwt.verify(verifyToken, ENV.SECRET_KEY);
+    if(!stored.otp || !stored.email){
+        throw new ApiError(404, "No information found.");
+    }
+    if(email !== stored.email){
+        throw new ApiError(404, "Unauthorized.");
+    }
+    const otpMatched = await bcrypt.compare(otp, stored.otp);
+    if(!otpMatched){
+        return res.status(401).json(new ApiResponse(401,null, "Invalid Otp."))
+    }
+    res.clearCookie("verifyToken", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: ENV.NODE_ENV === "production"
+    });
+    return res.status(200).json(new ApiResponse(200, {}, "Otp verified."));
 })
 
 export const login = asyncHandler( async (req, res)=>{
