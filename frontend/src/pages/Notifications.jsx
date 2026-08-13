@@ -72,11 +72,12 @@ function Notifications() {
                                                         </span>
                                                         <span className="text-[var(--text-muted)]"> liked your post</span>
                                                     </p>
-                                                    <img
+                                                    {notification.relatedPost.images.length > 0 && 
+                                                        <img
                                                         src={notification.relatedPost.images[0].url}
                                                         alt="Post"
                                                         className="h-9 w-9 rounded-lg object-cover shrink-0 shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)]"
-                                                    />
+                                                    />}
                                                 </div>
                                             }
                                             {notification.type === "comment" &&
@@ -90,11 +91,11 @@ function Notifications() {
                                                         </span>
                                                         <span className="text-[var(--text-muted)]"> commented on your post</span>
                                                     </p>
-                                                    <img
+                                                    {notification.relatedPost.imageslength > 0 && <img
                                                         src={notification.relatedPost.images[0].url}
                                                         alt="Post"
                                                         className="h-9 w-9 rounded-lg object-cover shrink-0 shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)]"
-                                                    />
+                                                    />}
                                                 </div>
                                             }
                                             {notification.type === "connect" &&
