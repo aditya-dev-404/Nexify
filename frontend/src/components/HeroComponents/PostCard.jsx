@@ -129,7 +129,7 @@ function PostCard({ postInfo }) {
                         </button>
                     </form>
 
-                    {openCommentBox && (<div className="all-cmments flex flex-col-reverse gap-3">
+                    {openCommentBox && (<div className="all-cmments flex flex-col-reverse gap-3 max-h-[200px] overflow-scroll no-scrollbar">
                         {comments?.length > 0 ? (
                             comments.map((comm, i) => (
                                 <div key={comm._id || i} className="flex gap-3 sm:gap-4">

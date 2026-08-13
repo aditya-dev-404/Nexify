@@ -10,7 +10,7 @@ import { IoLocationSharp } from "react-icons/io5";
 import { useNavigate, useParams } from 'react-router-dom'
 import { asyncHandler } from '../utils/async.handler';
 import ConnectionButton from '../components/ConnectionButton.jsx'
-
+import defaultProfileImage from '../assets/profile.png'
 
 function Profile() {
     const { user, posts, edit, setEdit, getUserDetails, profileData, setProfileData } = useUser();
@@ -18,7 +18,7 @@ function Profile() {
     const { userName } = useParams();
     const navigate = useNavigate();
     const isOwnProfile = !userName || userName === user?.userName;
-
+    const [openComments, setOpenComments] = useState(false);
     useEffect(() => {
         if (!user) return;
 
@@ -50,7 +50,7 @@ function Profile() {
             <Navbar />
             <div className="main bg-[var(--bg)] min-h-screen pb-10">
 
-                <div className="info-holder max-w-[700px] mx-auto px-4 sm:px-0 flex flex-col gap-4">
+                <div className="info-holder max-w-[700px] mx-auto px-4 sm:px-0 flex flex-col gap-4 mb-6 no-scrollbar">
 
                     {/* Cover image and Profile image */}
                     <div className="images relative">
@@ -113,8 +113,8 @@ function Profile() {
                         <button onClick={() => setEdit(!edit)} className="gradient-btn text-white min-w-[40%] text-sm font-medium px-6 py-2 rounded-full hover:opacity-90 active:scale-[0.98] transition">
                             Edit Profile
                         </button>
-                    </div>):(<div className="edit mt-5 flex justify-center">
-                        <ConnectionButton userId={profileData._id}/>
+                    </div>) : (<div className="edit mt-5 flex justify-center">
+                        <ConnectionButton userId={profileData._id} />
                     </div>)}
                     <div className="w-full h-[2px] bg-[var(--border)] m-5"></div>
                     {/* Posts */}
@@ -153,14 +153,40 @@ function Profile() {
                                         <ImagesCarousel images={post.images} />
                                     </div>
 
-                                    <div className="like-comment-iconbox flex items-center justify-between gap-6 border-y border-[var(--border)] py-3 px-4 sm:px-8">
+                                    <div className="flex items-center justify-between gap-6 border-y border-[var(--border)] py-3 px-4 sm:px-8">
                                         <div className="like flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--primary)] cursor-pointer transition text-sm sm:text-base">
                                             <p className='text-[var(--text-muted)] capitalize !text-[12px] sm:text-base italic'>{post.likes?.length || 0} Likes</p>
                                         </div>
-                                        <div className="comment flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--primary)] cursor-pointer transition text-sm sm:text-base">
+                                        <div onClick={()=>setOpenComments(!openComments)} className="comment flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--primary)] cursor-pointer transition text-sm sm:text-base">
                                             <p className='text-[var(--text-muted)] capitalize !text-[12px] sm:text-base italic'>{post.comments?.length || 0} Comments</p>
                                         </div>
                                     </div>
+                                    {openComments && (<div className="all-cmments flex flex-col-reverse gap-3 max-h-[200px] overflow-scroll no-scrollbar">
+                                        {post.comments?.length > 0 ? (
+                                            post.comments.map((comm, i) => (
+                                                <div key={comm._id || i} className="flex gap-3 sm:gap-4">
+                                                    <div className="image h-[26px] w-[26px] sm:h-[40px] sm:w-[40px] rounded-full overflow-hidden shrink-0 shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)]">
+                                                        <img
+                                                            src={comm.user?.profileImage?.url || defaultProfileImage}
+                                                            alt={comm.user?.name || "User Profile"}
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    </div>
+
+                                                    <div className="profile-info neo-inset flex flex-col justify-center w-full px-3 py-2 rounded-2xl">
+                                                        <span className="text-sm sm:text-xs font-bold text-[var(--text-muted)] mb-0.5 capitalize">
+                                                            {comm.user?.firstName + " " + comm.user?.lastName || "Anonymous"}
+                                                        </span>
+                                                        <p className="text-xs sm:text-sm text-[var(--text)] break-words">
+                                                            {comm.content}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-xs sm:text-sm text-[var(--text-muted)] ">No comments yet.</p>
+                                        )}
+                                    </div>)}
                                 </div>
                             ))
                         }

@@ -4,6 +4,7 @@ import ApiError from "../utils/api.error.js";
 import ApiResponse from "../utils/api.response.js";
 import User from "../models/user.model.js";
 import {io} from '../app.js'
+import Notification from "../models/notification.model.js";
 
 const emitStatusUpdate = (userId, updatedUserId, newStatus) => {
     io.to(`user:${userId}`).emit("statusUpdate", { updatedUserId: String(updatedUserId), newStatus });
@@ -38,6 +39,12 @@ export const sendConnectionRequest = asyncHandler(async(req, res)=>{
         reciever: id,
         status : 'pending'
     })
+    await Notification.create({
+        reciever:id,
+        type:"connection",
+        relatedUser:senderId,
+        relatedPost: null,
+    })
     emitStatusUpdate(id, senderId, "recieved");
     emitStatusUpdate(senderId, id, "pending");
 
@@ -64,6 +71,12 @@ export const acceptConnectionRequest = asyncHandler(async(req, res)=>{
     })
     await User.findByIdAndUpdate(connection.sender, {
         $addToSet:{connections:connection.reciever}
+    })
+        await Notification.create({
+        reciever:connection.sender,
+        type:"connection",
+        relatedUser:userId,
+        relatedPost: null,
     })
 
     emitStatusUpdate(connection.reciever, connection.sender, "connected");

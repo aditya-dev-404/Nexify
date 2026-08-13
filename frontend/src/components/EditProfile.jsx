@@ -170,11 +170,11 @@ function EditProfile() {
     return (
 
         <>
-            <div className="w-full h-[100vh] fixed top-0 z-[100] flex justify-center items-center custom-scroll">
+            <div className="w-full h-[100vh] fixed top-0 z-[100] flex justify-center items-center  no-scrollbar">
 
                 <div className="w-full h-full bg-[var(--text)] opacity-[0.6] absolute"></div>
 
-                <div className="neo w-[90%] max-w-[500px] h-[600px] bg-[var(--surface)] absolute z-[200] p-[40px] overflow-auto">
+                <div className="neo w-[90%] max-w-[500px] h-[600px] bg-[var(--surface)] absolute z-[200] p-[40px] overflow-auto no-scrollbar">
 
                     <div
                         onClick={() => { setEdit(!edit) }}

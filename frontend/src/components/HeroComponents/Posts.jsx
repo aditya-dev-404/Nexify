@@ -9,7 +9,7 @@ function Posts() {
   return (
     <>
     <div className="flex flex-col w-full min-h-[100vh] neo mt-4 ">
-        {posts.map((post, i)=> <PostCard key={i} postInfo = {post}/>)}
+        {posts.map((post)=> <PostCard key={post._id} postInfo = {post}/>)}
     </div>
     </>
   )

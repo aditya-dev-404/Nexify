@@ -22,7 +22,7 @@ function BottomBarForMobile() {
                     <p className="text-[10px] leading-none">Network</p>
                 </div>
 
-                <div className="notification relative flex flex-col items-center justify-center gap-0.5 text-[var(--text-muted)] active:text-[var(--primary)] cursor-pointer">
+                <div onClick={()=>navigate('/notifications')} className="notification relative flex flex-col items-center justify-center gap-0.5 text-[var(--text-muted)] active:text-[var(--primary)] cursor-pointer">
                     <FaBell className="text-xl" />
                     <p className="text-[10px] leading-none">Alerts</p>
                     <span className="absolute top-0 right-1.5 w-2 h-2 rounded-full bg-[var(--danger)]"></span>

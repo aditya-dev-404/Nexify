@@ -6,7 +6,8 @@ import cloudinary from "../config/cloud.config.js";
 import User from "../models/user.model.js";
 import fs from 'fs/promises'
 import { isObjectIdOrHexString } from "mongoose";
-import {io} from '../app.js'
+import { io } from '../app.js'
+import Notification from "../models/notification.model.js";
 
 
 
@@ -54,28 +55,45 @@ export const handleLike = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Post does not exist.");
     }
     const isLiked = post.likes.some(id => id.toString() === userId.toString());
-    const updateOperator = isLiked 
+    const updateOperator = isLiked
         ? { $pull: { likes: userId } }  // Remove like
         : { $addToSet: { likes: userId } }; // Add like uniquely
 
+    if (!isLiked && post.author != userId) {
+        const notification = await Notification.create({
+            reciever: post.author,
+            type: "like",
+            relatedUser: userId,
+            relatedPost: postId
+        })
+    }
     const updatedPost = await Post.findByIdAndUpdate(
-        postId, 
-        updateOperator, 
-        { returnDocument: 'after' } 
+        postId,
+        updateOperator,
+        { returnDocument: 'after' }
     );
-    io.emit("likeUpdated", {postId, likes:updatedPost.likes});
-    
+    io.emit("likeUpdated", { postId, likes: updatedPost.likes });
+
     res.status(200).json(new ApiResponse(200, updatedPost, "Like status updated successfully"));
 });
 
 export const handleComment = asyncHandler(async (req, res) => {
     const postId = req.params.id;
     const userId = req.userId;
-    const {content} = req.body;
+    const { content } = req.body;
     const updatedPost = await Post.findByIdAndUpdate(postId, {
-        $push : {comments:{content, user:userId}}
-    },{returnDocument:'after'})
-    .populate("comments.user", "firstName lastName profileImage headline")
-    io.emit("commentAdded", {postId, comm: updatedPost.comments})
+        $push: { comments: { content, user: userId } }
+    }, { returnDocument: 'after' })
+        .populate("comments.user", "firstName lastName profileImage headline")
+    if(userId != updatedPost.author){
+        const notification = await Notification.create({
+        reciever: updatedPost.author._id,
+        type: "comment",
+        relatedUser: userId,
+        relatedPost: postId
+    })
+    }
+
+    io.emit("commentAdded", { postId, comm: updatedPost.comments })
     res.status(201).json(new ApiResponse(201, updatedPost, "Comment Added."));
 })

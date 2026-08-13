@@ -8,6 +8,7 @@ import Signup from './pages/Signup'
 import { useUser } from './context/userContext';
 import Networks from './pages/Networks';
 import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
 
 function App() {
   const { user, loading } = useUser();
@@ -23,6 +24,7 @@ function App() {
         <Route path='/networks' element={user ? <Networks/> : <Navigate to={"/login"}/>}/>
         <Route path='/profile' element={user ? <Profile/> : <Navigate to={"/login"}/>}/>
         <Route path='/profile/:userName' element={user ? <Profile/> : <Navigate to={"/login"}/>}/>
+        <Route path='/notifications' element={user ? <Notifications/> : <Navigate to={"/login"}/>}/>
       </Routes>
       <ToastContainer position="top-right" autoClose={2000} />
     </>

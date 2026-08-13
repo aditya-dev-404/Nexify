@@ -108,7 +108,7 @@ function Navbar() {
                             <p className="text-[11px] leading-none">My Network</p>
                         </div>
 
-                        <div className="notification relative flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-light)] cursor-pointer transition">
+                        <div onClick={()=>navigate('/notifications')} className="notification relative flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-light)] cursor-pointer transition">
                             <FaBell className="text-lg" />
                             <p className="text-[11px] leading-none">Notifications</p>
                             <span className="absolute top-1 right-4 w-2 h-2 rounded-full bg-[var(--danger)]"></span>
