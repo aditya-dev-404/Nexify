@@ -142,7 +142,11 @@ function Signup() {
                             {show ? <HiEyeOff /> : <IoEyeSharp />}
                         </div>
                     </div>
-                    <button type="submit" disabled={!verified || loading} className={`${!verified || loading ? "text-[--text-muted]" : ""} gradient-btn text-white text-sm font-medium py-3 rounded-[20px] mt-2 hover:opacity-90 active:scale-[0.98] transition`}>
+                    <button
+                        type="submit"
+                        disabled={!verified || loading}
+                        className="gradient-btn text-white text-sm font-medium py-3 rounded-[20px] mt-2 transition enabled:hover:opacity-90 enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-75"
+                    >
                         {loading ? "Signing up..." : "Sign Up"}
                     </button>
                     <p className="text-center text-sm text-[var(--text-muted)] mt-2">
