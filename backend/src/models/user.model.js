@@ -79,7 +79,15 @@ const userSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
         }
-    ]
+    ],
+    resetPassOtp:{
+        type:String,
+        default:null
+    },
+    resetPassOtpExpiresAt:{
+        type:Date,
+        default:null
+    }
 }, { timestamps: true })
 
 const User = mongoose.model("User", userSchema);

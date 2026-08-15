@@ -8,7 +8,7 @@ import ApiError from '../utils/api.error.js'
 import ApiResponse from '../utils/api.response.js'
 import generateToken from '../config/token.js'
 import transporter from '../config/mail.config.js'
-import { mailOptionsForOtp, welcomeMailOptions } from '../config/mail.options.js'
+import { mailOptionsForOtp, welcomeMailOptions, mailOptionsForResetOtp } from '../config/mail.options.js'
 
 
 export const signup = asyncHandler(async (req, res) => {
@@ -125,3 +125,42 @@ export const logout = asyncHandler( async (req, res)=>{
     res.status(204).json(new ApiResponse(204, {}, "User has been Logged Out."))
 })
 
+export const sendResetPassOtp = asyncHandler(async(req, res)=>{
+    const {email} = req.body
+    if(!email){
+        throw new ApiError(401, "Enter valid email.")
+    }
+    const user = await User.findOne({email});
+    if(!user){
+        throw new ApiError(401, "Enter a valid email.")
+    }
+    const otp = Math.floor(100000+Math.random()*900000).toString();
+    user.resetPassOtp = otp;
+    user.resetPassOtpExpiresAt = Date.now() + 10 * 60 * 1000;
+    await user.save();
+    await transporter.sendMail(mailOptionsForResetOtp(email, otp));
+    return res.status(200).json(new ApiResponse(200, {}, "Reset Password otp has been sent to provided Email."));
+})
+
+export const verifyResetPassOtp = asyncHandler(async(req, res)=>{
+    const {email, otp, newPassword} = req.body;
+    if(!email || !otp || otp.length !== 6 || !newPassword){
+        throw new ApiError(401, "Enter valid credentials.");
+    }
+    const user = await User.findOne({email});
+    if(!user){
+        throw new ApiError(401, "Enter valid Email.");
+    }
+    if(user.resetPassOtpExpiresAt < Date.now()){
+        throw new ApiError(401, "Otp Expired or Invalid otp.");
+    }
+    if(otp !== user.resetPassOtp){
+        throw new ApiError(401, "Otp Expired or Invalid otp.");
+    }
+    const hashedPass = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPass;
+    user.resetPassOtp = null;
+    user.resetPassOtpExpiresAt = null;
+    await user.save();
+    return res.status(201).json(new ApiResponse(201, {}, "Your Password reset Successfull."))
+})
