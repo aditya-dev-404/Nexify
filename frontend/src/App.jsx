@@ -14,19 +14,24 @@ function App() {
   const { user, loading } = useUser();
 
   if (loading) return null;
-  
+
   return (
     <>
       <Routes>
-        <Route path='/' element={user ? <Home/> : <Navigate to={"/login"}/>}/>
-        <Route path="/signup" element={user ? <Navigate to={"/"}/> : <Signup/>}/>
-        <Route path="/login" element={user ? <Navigate to={"/"}/> :<Login/>}/>
-        <Route path='/networks' element={user ? <Networks/> : <Navigate to={"/login"}/>}/>
-        <Route path='/profile' element={user ? <Profile/> : <Navigate to={"/login"}/>}/>
-        <Route path='/profile/:userName' element={user ? <Profile/> : <Navigate to={"/login"}/>}/>
-        <Route path='/notifications' element={user ? <Notifications/> : <Navigate to={"/login"}/>}/>
+        <Route path='/' element={user ? <Home /> : <Navigate to={"/login"} />} />
+        <Route path="/signup" element={user ? <Navigate to={"/"} /> : <Signup />} />
+        <Route path="/login" element={user ? <Navigate to={"/"} /> : <Login />} />
+        <Route path='/networks' element={user ? <Networks /> : <Navigate to={"/login"} />} />
+        <Route path='/profile' element={user ? <Profile /> : <Navigate to={"/login"} />} />
+        <Route path='/profile/:userName' element={user ? <Profile /> : <Navigate to={"/login"} />} />
+        <Route path='/notifications' element={user ? <Notifications /> : <Navigate to={"/login"} />} />
       </Routes>
-      <ToastContainer position="top-right" autoClose={2000} />
+      <ToastContainer
+        toastClassName="neo-inset"
+        bodyClassName="text-[var(--text)] text-sm neo-inset"
+        progressClassName="!bg-gradient-to-r !from-[var(--primary)] !to-[var(--secondary)]"
+        autoClose={2000}
+      />
     </>
   )
 }

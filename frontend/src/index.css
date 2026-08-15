@@ -72,3 +72,20 @@
   );
 }
 
+
+.Toastify__toast {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-radius: 20px !important;
+  box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light) !important;
+  font-family: inherit;
+}
+.Toastify__toast-body {
+  color: var(--text) !important;
+}
+.Toastify__close-button {
+  color: var(--text-muted) !important;
+}
+.Toastify__progress-bar {
+  background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+}
