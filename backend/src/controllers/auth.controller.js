@@ -7,7 +7,6 @@ import bcrypt from 'bcryptjs'
 import ApiError from '../utils/api.error.js'
 import ApiResponse from '../utils/api.response.js'
 import generateToken from '../config/token.js'
-import transporter from '../config/mail.config.js'
 import { mailOptionsForOtp, welcomeMailOptions, mailOptionsForResetOtp } from '../config/mail.options.js'
 import { sendEmail } from "../config/mail.config.js";
 
