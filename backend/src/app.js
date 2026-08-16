@@ -38,6 +38,9 @@ app.use('/api/user', userRouter);
 app.use('/api/user/post', postRouter);
 app.use('/api/user/connection', connectionRouter);
 app.use('/api/notification',notificationRouter);
+app.get('/ch',(req, res)=>{
+    return res.status(200).json({status:200, message:"Backend is alive."})
+})
 io.on("connection", (socket) => {
     socket.on("register", (userId)=>{
         socket.join(`user:${userId}`);
