@@ -11,5 +11,6 @@ export const ENV = {
     CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
     SMTP_USER: process.env.SMTP_USER,
     SMTP_PASS: process.env.SMTP_PASS,
-    SENDER_MAIL: process.env.SENDER_MAIL
+    SENDER_MAIL: process.env.SENDER_MAIL,
+    BREVO_API_KEY: process.env.BREVO_API_KEY
 }
