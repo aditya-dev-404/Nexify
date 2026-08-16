@@ -40,7 +40,7 @@ export const signup = asyncHandler(async (req, res) => {
         sameSite: "strict",
         secure: ENV.NODE_ENV === 'production'
     })
-    await sendMail(welcomeMailOptions(email, firstName));
+    await sendEmail(welcomeMailOptions(email, firstName));
     res.status(201).json(new ApiResponse(201, createdUser, "User created successfully"))
 
 })
@@ -60,7 +60,7 @@ export const sendVerifyEmailOtp = asyncHandler(async(req, res)=>{
         secure: ENV.NODE_ENV === 'production'
     })
 
-    await sendMail(mailOptionsForOtp(email, otp));
+    await sendEmail(mailOptionsForOtp(email, otp));
     return res.status(201).json(new ApiResponse(201,{}, "Otp Sent."));
 })
 
@@ -137,7 +137,7 @@ export const sendResetPassOtp = asyncHandler(async(req, res)=>{
     user.resetPassOtp = otp;
     user.resetPassOtpExpiresAt = Date.now() + 10 * 60 * 1000;
     await user.save();
-    await sendMail(mailOptionsForResetOtp(email, otp));
+    await sendEmail(mailOptionsForResetOtp(email, otp));
     return res.status(200).json(new ApiResponse(200, {}, "Reset Password otp has been sent to provided Email."));
 })
 
