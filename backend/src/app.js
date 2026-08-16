@@ -11,14 +11,15 @@ import notificationRouter from './routes/notification.routes.js';
 
 const app = express();
 const server = http.createServer(app);
+const frontendOrigin = "https://nixifyc.netlify.app";
 const io = new Server(server, {
     cors : ({
-    origin:"http://localhost:5173",
+    origin: frontendOrigin,
     credentials:true
     })
 })
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin: frontendOrigin,
     credentials:true
 }));
 app.use(express.json());
