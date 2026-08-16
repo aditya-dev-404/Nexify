@@ -92,7 +92,7 @@ export const getSuggestedUsers = asyncHandler(async (req, res) => {
         _id: { $ne: currUser._id, $nin: currUser.connections }
     }).select("-password -email");
     if (suggestedUsers.length == 0) {
-        return res.status(201).json(new ApiResponse(201, {}, "No users to suggest."))
+        return res.status(201).json(new ApiResponse(201, [], "No users to suggest."))
     }
     return res.status(200).json(new ApiResponse(200, suggestedUsers, "Suggested Users"))
 })
