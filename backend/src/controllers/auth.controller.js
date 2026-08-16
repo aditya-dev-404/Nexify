@@ -9,7 +9,7 @@ import ApiResponse from '../utils/api.response.js'
 import generateToken from '../config/token.js'
 import transporter from '../config/mail.config.js'
 import { mailOptionsForOtp, welcomeMailOptions, mailOptionsForResetOtp } from '../config/mail.options.js'
-
+import { sendEmail } from "../config/mail.config.js";
 
 export const signup = asyncHandler(async (req, res) => {
     const { firstName, lastName, userName, email, password } = req.body;
@@ -41,7 +41,7 @@ export const signup = asyncHandler(async (req, res) => {
         sameSite: "strict",
         secure: ENV.NODE_ENV === 'production'
     })
-    await transporter.sendMail(welcomeMailOptions(email, firstName));
+    await sendMail(welcomeMailOptions(email, firstName));
     res.status(201).json(new ApiResponse(201, createdUser, "User created successfully"))
 
 })
@@ -61,7 +61,7 @@ export const sendVerifyEmailOtp = asyncHandler(async(req, res)=>{
         secure: ENV.NODE_ENV === 'production'
     })
 
-    await transporter.sendMail(mailOptionsForOtp(email, otp));
+    await sendMail(mailOptionsForOtp(email, otp));
     return res.status(201).json(new ApiResponse(201,{}, "Otp Sent."));
 })
 
@@ -138,7 +138,7 @@ export const sendResetPassOtp = asyncHandler(async(req, res)=>{
     user.resetPassOtp = otp;
     user.resetPassOtpExpiresAt = Date.now() + 10 * 60 * 1000;
     await user.save();
-    await transporter.sendMail(mailOptionsForResetOtp(email, otp));
+    await sendMail(mailOptionsForResetOtp(email, otp));
     return res.status(200).json(new ApiResponse(200, {}, "Reset Password otp has been sent to provided Email."));
 })
 
