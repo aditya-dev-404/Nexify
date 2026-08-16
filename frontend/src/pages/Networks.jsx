@@ -5,6 +5,7 @@ import { asyncHandler } from '../utils/async.handler';
 import axios from 'axios';
 import moment from 'moment';
 import { useUser } from '../context/userContext';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -13,6 +14,7 @@ function Networks() {
     const {user} = useUser();
     const [connections, setConnections] = useState([]);
     const [userConnections, setUserConnections] = useState([]);
+    const navigate = useNavigate();
     useEffect(() => {
         const handleGetRequests = asyncHandler(async () => {
             const result = await axios.get(
@@ -146,7 +148,7 @@ function Networks() {
                                 className="conn-card w-full neo rounded-2xl p-4 flex items-center justify-between gap-4"
                             >
                                 <div className="post-header flex gap-4 items-center min-w-0">
-                                    <div className="image h-[45px] w-[45px] sm:h-[60px] sm:w-[60px] rounded-full overflow-hidden shrink-0 shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)]">
+                                    <div onClick={()=>navigate(`/profile/${connection.userName}`)} className="image h-[45px] w-[45px] sm:h-[60px] sm:w-[60px] rounded-full overflow-hidden shrink-0 shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)]">
                                         <img
                                             src={connection.profileImage?.url}
                                             alt={connection.firstName}
