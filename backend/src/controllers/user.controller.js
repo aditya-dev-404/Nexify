@@ -84,7 +84,7 @@ export const getUserDetails = asyncHandler(async (req, res) => {
 })
 
 export const getSuggestedUsers = asyncHandler(async (req, res) => {
-    const currUser = await User.findById(req.userId).select("connection");
+    const currUser = await User.findById(req.userId).select("connections");
     if (!currUser) {
         throw new ApiError(400, "Login first.")
     }
