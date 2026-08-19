@@ -10,6 +10,12 @@ import generateToken from '../config/token.js'
 import { mailOptionsForOtp, welcomeMailOptions, mailOptionsForResetOtp } from '../config/mail.options.js'
 import { sendEmail } from "../config/mail.config.js";
 
+const cookieOptions = {
+    httpOnly: true,
+    sameSite: ENV.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: ENV.NODE_ENV === 'production'
+};
+
 export const signup = asyncHandler(async (req, res) => {
     const { firstName, lastName, userName, email, password } = req.body;
     if (!firstName || !userName || !email) {
@@ -35,10 +41,8 @@ export const signup = asyncHandler(async (req, res) => {
     const createdUser = await User.findById(user._id).select('-password')
     const token = await generateToken(createdUser._id);
     res.cookie("token", token, {
-        httpOnly: true,
         maxAge: 15 * 24 * 60 * 60 * 1000,
-        sameSite: "none",
-        secure: ENV.NODE_ENV === 'production'
+        ...cookieOptions
     })
     await sendEmail(welcomeMailOptions(email, firstName));
     res.status(201).json(new ApiResponse(201, createdUser, "User created successfully"))
@@ -54,10 +58,8 @@ export const sendVerifyEmailOtp = asyncHandler(async (req, res) => {
     const hashedOtp = await bcrypt.hash(otp, 12);
     const verifyToken = jwt.sign({ email, otp: hashedOtp }, ENV.SECRET_KEY, { expiresIn: '10m' });
     res.cookie('verifyToken', verifyToken, {
-        httpOnly: true,
         maxAge: 10 * 60 * 1000,
-        sameSite: "none",
-        secure: ENV.NODE_ENV === 'production'
+        ...cookieOptions
     })
 
     await sendEmail(mailOptionsForOtp(email, otp));
@@ -85,10 +87,8 @@ export const verifyOtp = asyncHandler(async (req, res) => {
         return res.status(401).json(new ApiResponse(401, null, "Invalid Otp."))
     }
     res.cookie("verifyToken", verifyToken, {
-        httpOnly: true,
         maxAge: 10 * 60 * 1000,
-        sameSite: "none",
-        secure: true
+        ...cookieOptions
     });
     return res.status(200).json(new ApiResponse(200, {}, "Otp verified."));
 })
@@ -111,10 +111,8 @@ export const login = asyncHandler(async (req, res) => {
     }
     const token = await generateToken(user._id);
     res.cookie("token", token, {
-        httpOnly: true,
         maxAge: 15 * 24 * 60 * 60 * 1000,
-        sameSite: "none",
-        secure: ENV.NODE_ENV === 'production'
+        ...cookieOptions
     })
     const loggedInUser = await User.findById(user._id).select('-password');
     res.status(200).json(new ApiResponse(200, loggedInUser, "User Logged in."))
@@ -122,9 +120,7 @@ export const login = asyncHandler(async (req, res) => {
 
 export const logout = asyncHandler(async (req, res) => {
     res.clearCookie("token", {
-        httpOnly: true,
-        sameSite: "none",
-        secure: ENV.NODE_ENV === 'production'
+        ...cookieOptions
     });;
     res.status(204).json(new ApiResponse(204, {}, "User has been Logged Out."))
 })

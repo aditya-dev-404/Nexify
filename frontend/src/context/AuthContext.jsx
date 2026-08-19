@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { AuthContext } from './userAuth.js'; 
+import { API_URL } from '../config/env.js';
 
 export const AuthProvider = ({ children }) => {
-  const baseUrl = "https://nexify-backend-ar99.onrender.com"
   const value = {
-    baseUrl,
+    baseUrl: API_URL,
   }
 
   return (

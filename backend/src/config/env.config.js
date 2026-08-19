@@ -3,6 +3,7 @@ dotenv.config()
 
 export const ENV = {
     PORT: process.env.PORT,
+    CLIENT_ORIGIN: process.env.CLIENT_ORIGIN,
     DB_URL: process.env.DB_URL,
     SECRET_KEY: process.env.SECRET_KEY,
     NODE_ENV: process.env.NODE_ENV,

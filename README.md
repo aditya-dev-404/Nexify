@@ -58,25 +58,8 @@ cd backend
 npm install
 ```
 
-Create `backend/.env` using the following template. Do not commit this file or real credentials.
-
-```dotenv
-PORT=5000
-NODE_ENV=development
-DB_URL=mongodb://127.0.0.1:27017/nexify
-SECRET_KEY=replace-with-a-long-random-secret
-
-CLOUD_NAME=your-cloudinary-cloud-name
-CLOUD_API_KEY=your-cloudinary-api-key
-CLOUD_API_SECRET=your-cloudinary-api-secret
-
-BREVO_API_KEY=your-brevo-api-key
-
-# Present in the environment configuration; currently not used by the Brevo sender.
-SMTP_USER=
-SMTP_PASS=
-SENDER_MAIL=
-```
+Copy `backend/.env.example` to `backend/.env` and fill in the secrets. The local
+configuration permits the Vite development server at `http://localhost:5173`.
 
 Start the API server:
 
@@ -95,15 +78,19 @@ npm run dev
 
 Vite prints the local URL, normally `http://localhost:5173`.
 
-### Important local-development configuration
+### Environment configuration
 
-The current client and server use deployed URLs directly in source code:
+URLs and secrets are configured outside source code. `.env*` files are ignored by Git;
+only the `.example` templates are committed.
 
-- `frontend/src/context/AuthContext.jsx` defines the API base URL.
-- `frontend/src/components/HeroComponents/PostCard.jsx` and `frontend/src/components/ConnectionButton.jsx` define the Socket.IO server URL.
-- `backend/src/app.js` defines the allowed frontend CORS origin.
+| Environment | Frontend | Backend |
+| --- | --- | --- |
+| Development | Copy `frontend/.env.development.example` to `.env.development`. It uses `VITE_API_URL=http://localhost:5000`. | Copy `backend/.env.example` to `.env`; it sets `CLIENT_ORIGIN=http://localhost:5173`. |
+| Production | Set `VITE_API_URL` to the deployed API's HTTPS URL in the build environment (see `frontend/.env.production.example`). | Set every value from `backend/.env.production.example` in the hosting provider's environment/secret settings, especially `NODE_ENV=production` and `CLIENT_ORIGIN`. |
 
-Before developing locally, change these values to your local addresses (for example `http://localhost:5000` for the API and `http://localhost:5173` for the frontend), or refactor them to environment variables. The API must allow the exact client origin and credentials. Cookies configured with `SameSite=None` are only accepted by browsers over HTTPS, so a local HTTP setup may also require adjusting cookie options for development.
+`CLIENT_ORIGIN` accepts a comma-separated list when more than one frontend origin needs
+access. In production, build the frontend only after providing `VITE_API_URL`: Vite embeds
+that public API URL into the static build. Keep all backend credentials private.
 
 ## Available scripts
 
@@ -188,8 +175,9 @@ The server uses Socket.IO for immediate UI updates:
 
 - Deploy the frontend as a static Vite site, running `npm run build` in `frontend`; the output directory is `frontend/dist`.
 - Deploy the backend as a Node.js service with `npm start` and all environment variables configured.
-- Set the backend's CORS `frontendOrigin` to the deployed frontend URL and ensure Socket.IO uses the same origin.
-- For cross-site cookies, use HTTPS, `credentials: true`, `SameSite=None`, and secure cookies in production.
+- Set `CLIENT_ORIGIN` in the backend service to the deployed frontend URL; Socket.IO and HTTP CORS share this setting.
+- Set `VITE_API_URL` in the frontend build environment to the deployed backend URL.
+- Production automatically uses HTTPS-only, secure cross-site cookies; development uses local `SameSite=Lax` cookies.
 - Configure your hosting provider to forward SPA routes to `index.html`. This repository includes `frontend/public/_redirects` for Netlify-style deployments.
 
 ## Data model overview

@@ -5,7 +5,9 @@ import { asyncHandler } from '../utils/async.handler';
 import { io } from 'socket.io-client';
 import { useUser } from '../context/userContext';
 import { useNavigate } from 'react-router-dom';
-const socket = io("https://nexify-backend-ar99.onrender.com")
+import { API_URL } from '../config/env.js';
+
+const socket = io(API_URL)
 
 function ConnectionButton({userId}) {
     const {baseUrl} = useAuth();

@@ -8,10 +8,11 @@ import connectionRouter from './routes/connection.routes.js';
 import http from 'http'
 import {Server} from 'socket.io'
 import notificationRouter from './routes/notification.routes.js';
+import { ENV } from './config/env.config.js';
 
 const app = express();
 const server = http.createServer(app);
-const frontendOrigin = "https://nixifyc.netlify.app";
+const frontendOrigin = ENV.CLIENT_ORIGIN;
 const io = new Server(server, {
     cors : ({
     origin: frontendOrigin,

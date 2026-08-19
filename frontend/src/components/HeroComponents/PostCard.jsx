@@ -11,8 +11,9 @@ import defaultProfileImage from '../../assets/profile.png';
 import {io} from 'socket.io-client'
 import ConnectionButton from '../ConnectionButton';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config/env.js';
 
-const socket = io('https://nexify-backend-ar99.onrender.com')
+const socket = io(API_URL)
 
 
 function PostCard({ postInfo }) {
