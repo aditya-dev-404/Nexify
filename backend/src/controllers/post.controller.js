@@ -85,15 +85,65 @@ export const handleComment = asyncHandler(async (req, res) => {
         $push: { comments: { content, user: userId } }
     }, { returnDocument: 'after' })
         .populate("comments.user", "firstName lastName profileImage headline")
-    if(userId != updatedPost.author){
+    if (userId != updatedPost.author) {
         const notification = await Notification.create({
-        reciever: updatedPost.author._id,
-        type: "comment",
-        relatedUser: userId,
-        relatedPost: postId
-    })
+            reciever: updatedPost.author._id,
+            type: "comment",
+            relatedUser: userId,
+            relatedPost: postId
+        })
     }
 
     io.emit("commentAdded", { postId, comm: updatedPost.comments })
     res.status(201).json(new ApiResponse(201, updatedPost, "Comment Added."));
+})
+
+
+export const deleteComment = asyncHandler(async (req, res) => {
+    const { postId, commentId } = req.params;
+    if (!postId || !commentId) {
+        throw new ApiError(400, "Post ID and Comment ID are required.");
+    }
+    const userId = req.userId;
+    const post = await Post.findById(postId);
+    if (!post) {
+        throw new ApiError(404, "Post not found.");
+    }
+    // post.comments.id(commentId) is a Mongoose method for finding a specific subdocument inside an array.
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+        throw new ApiError(404, "Comment not found.");
+    }
+    const isCommentOwner = comment.user.toString() === userId.toString();
+    const isPostOwner = post.author.toString() === userId.toString();
+    if (!isCommentOwner && !isPostOwner) {
+        throw new ApiError(403, "Unauthorized.");
+    }
+    // post.comments.pull(commentId) removes the comment with that _id from the comments array.
+    post.comments.pull(commentId);
+    await post.save();
+    return res.status(200).json(new ApiResponse(200, {}, "Comment deleted successfully."));
+});
+
+export const editComment = asyncHandler(async (req, res)=>{
+    const { postId, commentId} = req.params;
+    const { editedComment } = req.body;
+    if(!postId || !commentId || !editedComment){
+        throw new ApiError(400, "Invalid Credentials !");
+    }
+    const post = await Post.findById(postId);
+    if(!post){
+        throw new ApiError(401, "Invalid Post!");
+    }
+    const comment = post.comments.id(commentId);
+    if(!comment){
+        throw new ApiError(401, "Comment not found!");
+    }
+    const isCommentOwner = comment.user.toString() === req.userId;
+    if(!isCommentOwner){
+        throw new ApiError(402, "unauthorized access.");
+    }
+    comment.content = editedComment;
+    await post.save();
+    return res.status(200).json(new ApiResponse(200, {}, "Comment Updated!"));
 })

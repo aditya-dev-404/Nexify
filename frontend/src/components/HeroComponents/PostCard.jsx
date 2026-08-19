@@ -8,10 +8,15 @@ import axios from 'axios';
 import { useAuth } from '../../context/userAuth';
 import { useUser } from '../../context/userContext';
 import defaultProfileImage from '../../assets/profile.png';
-import {io} from 'socket.io-client'
+import { io } from 'socket.io-client'
 import ConnectionButton from '../ConnectionButton';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config/env.js';
+import { PiDotsThreeOutlineVertical } from "react-icons/pi";
+import { MdOutlineEdit } from "react-icons/md";
+import { MdDeleteOutline } from "react-icons/md";
+import { IoClose } from "react-icons/io5";
+import { MdDoneOutline } from "react-icons/md";
 
 const socket = io(API_URL)
 
@@ -25,6 +30,8 @@ function PostCard({ postInfo }) {
     const [openCommentBox, setOpenCommentBox] = useState(false);
     const [comment, setComment] = useState("");
     const [comments, setComments] = useState(postInfo.comments);
+    const [editedComment, setEditedComment] = useState("");
+    const [editingCommentId, setEditingCommentId] = useState(null);
     const navigate = useNavigate();
 
     const isLong = postInfo.description.length > 150;
@@ -34,7 +41,7 @@ function PostCard({ postInfo }) {
         })
         setLiked(result.data.data.likes.includes(user?._id));
     })
-    const handleProfileRedirect = (userName)=>{
+    const handleProfileRedirect = (userName) => {
         navigate(`/profile/${userName}`)
     }
     useEffect(() => {
@@ -44,19 +51,57 @@ function PostCard({ postInfo }) {
                 setLiked(updatedLikes.includes(user?._id));
             }
         };
-        const handleCommentUpdate = ({postId, comm})=>{
-            if(postId === postInfo._id){
+        const handleCommentUpdate = ({ postId, comm }) => {
+            if (postId === postInfo._id) {
                 setComments(comm);
             }
         }
         socket.on("likeUpdated", handleLikeUpdated);
         socket.on("commentAdded", handleCommentUpdate)
 
-        return () =>{
+        return () => {
             socket.off("likeUpdated", handleLikeUpdated);
             socket.off("commentAdded", handleCommentUpdate);
-        } 
+        }
     }, [postInfo._id, user?._id]);
+
+    const handleDeleteComment = asyncHandler(async (commentId) => {
+        await axios.delete(`${baseUrl}/api/user/post/comment/${postInfo._id}/${commentId}`, { withCredentials: true });
+        setComments((currentComments) => currentComments.filter((currentComment) => currentComment._id !== commentId));
+
+        if (editingCommentId === commentId) {
+            setEditingCommentId(null);
+            setEditedComment("");
+        }
+    })
+
+    const handleEditComment = (commentId, content) => {
+        setEditingCommentId(commentId);
+        setEditedComment(content);
+    }
+
+    const handleCancelEdit = () => {
+        setEditingCommentId(null);
+        setEditedComment("");
+    }
+
+    const handleEditSubmit = asyncHandler(async(e)=>{
+        e.preventDefault();
+        const updatedContent = editedComment.trim();
+        if (!updatedContent || !editingCommentId) return;
+
+        await axios.put(
+            `${baseUrl}/api/user/post/comment/${postInfo._id}/${editingCommentId}`,
+            { editedComment: updatedContent },
+            { withCredentials: true }
+        );
+        setComments((currentComments) => currentComments.map((currentComment) => (
+            currentComment._id === editingCommentId
+                ? { ...currentComment, content: updatedContent }
+                : currentComment
+        )));
+        handleCancelEdit();
+    })
 
 
 
@@ -73,7 +118,7 @@ function PostCard({ postInfo }) {
         <>
             <div className="post-card neo p-4 sm:p-6 rounded-2xl w-full flex flex-col gap-4">
                 <div className="post-header flex gap-4">
-                    <div onClick={()=>handleProfileRedirect(postInfo.author.userName)} className="image h-[30px] w-[30px] sm:h-[60px] sm:w-[60px] rounded-full overflow-hidden shrink-0 shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)]">
+                    <div onClick={() => handleProfileRedirect(postInfo.author.userName)} className="image h-[30px] w-[30px] sm:h-[60px] sm:w-[60px] rounded-full overflow-hidden shrink-0 shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)]">
                         <img src={postInfo.author.profileImage.url} alt="" className="h-full w-full object-cover" />
                     </div>
                     <div className="profile-info flex flex-col justify-center w-[70%]">
@@ -81,8 +126,8 @@ function PostCard({ postInfo }) {
                         <p className='text-xs sm:text-sm text-[var(--text-muted)] truncate'>{postInfo.author.headings}</p>
                         <p className='text-xs text-[var(--text-muted)] truncate'>{moment(postInfo.createdAt).fromNow()}</p>
                     </div>
-                       {user._id !== postInfo.author._id && <ConnectionButton userId = {postInfo.author._id}/>}
-                    
+                    {user._id !== postInfo.author._id && <ConnectionButton userId={postInfo.author._id} />}
+
                 </div>
 
                 <div className="post-description text-[var(--text)] text-sm sm:text-base leading-relaxed">
@@ -130,7 +175,30 @@ function PostCard({ postInfo }) {
                         </button>
                     </form>
 
+
+                    <div hidden={!editingCommentId} className="w-full flex items-center gap-2 neo-inset px-3 py-1.5 rounded-full">
+
+                    <form onSubmit={handleEditSubmit} className="flex items-center gap-2 flex-1 min-w-0">
+                        <input
+                            value={editedComment}
+                            onChange={(e)=>setEditedComment(e.target.value)}
+                            type="text"
+                            placeholder="Edit comment..."
+                            className="flex-1 bg-transparent outline-none pl-2 text-sm text-[var(--text)] placeholder-[var(--text-muted)] min-w-0"
+                        />
+                        <button type='submit' className="gradient-btn flex items-center gap-1 text-white text-xs sm:text-sm font-medium px-3 py-1.5 rounded-full hover:opacity-90 active:scale-[0.98] transition shrink-0">
+                            Save <MdDoneOutline size={14} />
+                        </button>
+                    </form>
+                    <IoClose
+                        hidden={!editingCommentId}
+                        onClick={handleCancelEdit}
+                        className='w-7 h-7 sm:w-8 sm:h-8 p-1 flex items-center justify-center shrink-0 bg-[var(--surface)] rounded-full shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)] text-[var(--text-muted)] hover:text-[var(--danger)] active:scale-[0.96] transition cursor-pointer'
+                    />
+                </div>
+
                     {openCommentBox && (<div className="all-cmments flex flex-col-reverse gap-3 max-h-[200px] overflow-scroll no-scrollbar">
+
                         {comments?.length > 0 ? (
                             comments.map((comm, i) => (
                                 <div key={comm._id || i} className="flex gap-3 sm:gap-4">
@@ -141,15 +209,20 @@ function PostCard({ postInfo }) {
                                             className="h-full w-full object-cover"
                                         />
                                     </div>
-
-                                    <div className="profile-info neo-inset flex flex-col justify-center w-full px-3 py-2 rounded-2xl">
+                                    <div className="neo-inset flex flex-col justify-center w-full px-3 py-2 rounded-2xl">
                                         <span className="text-sm sm:text-xs font-bold text-[var(--text-muted)] mb-0.5 capitalize">
-                                            {comm.user?.firstName+" "+comm.user?.lastName || "Anonymous"}
+                                            {comm.user?.firstName + " " + comm.user?.lastName || "Anonymous"}
                                         </span>
                                         <p className="text-xs sm:text-sm text-[var(--text)] break-words">
                                             {comm.content}
                                         </p>
                                     </div>
+
+                                    {comm.user?._id === user?._id && <div hidden={Boolean(editingCommentId)} className="flex justify-center w-full max-w-[15%]">
+                                        <MdOutlineEdit onClick={() => handleEditComment(comm._id, comm.content)} className='w-7 h-7 m-2 sm:w-8 sm:h-8 p-1 flex items-center justify-center shrink-0 bg-[var(--surface)] rounded-full shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)] text-[var(--text-muted)] hover:text-[var(--primary)] active:scale-[0.96] transition cursor-pointer' />
+                                        <MdDeleteOutline onClick={() => handleDeleteComment(comm._id)} className='w-7 h-7 m-2 sm:w-8 sm:h-8 p-1 flex items-center justify-center shrink-0 bg-[var(--surface)] rounded-full shadow-[3px_3px_6px_var(--shadow-dark),-3px_-3px_6px_var(--shadow-light)] text-[var(--text-muted)] hover:text-[var(--danger)] active:scale-[0.96] transition cursor-pointer' />
+                                    </div>}
+
                                 </div>
                             ))
                         ) : (
