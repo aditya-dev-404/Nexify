@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ImagesCarousel from '../ImagesCarousel'
 import { AiFillLike } from "react-icons/ai";
 import { FaComments } from "react-icons/fa6";
@@ -32,6 +32,7 @@ function PostCard({ postInfo }) {
     const [comments, setComments] = useState(postInfo.comments);
     const [editedComment, setEditedComment] = useState("");
     const [editingCommentId, setEditingCommentId] = useState(null);
+    const editInputRef = useRef(null);
     const navigate = useNavigate();
 
     const isLong = postInfo.description.length > 150;
@@ -79,6 +80,12 @@ function PostCard({ postInfo }) {
         setEditingCommentId(commentId);
         setEditedComment(content);
     }
+
+    useEffect(() => {
+        if (editingCommentId) {
+            editInputRef.current?.focus();
+        }
+    }, [editingCommentId]);
 
     const handleCancelEdit = () => {
         setEditingCommentId(null);
@@ -180,6 +187,7 @@ function PostCard({ postInfo }) {
 
                     <form onSubmit={handleEditSubmit} className="flex items-center gap-2 flex-1 min-w-0">
                         <input
+                            ref={editInputRef}
                             value={editedComment}
                             onChange={(e)=>setEditedComment(e.target.value)}
                             type="text"
